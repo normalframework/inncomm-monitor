@@ -2,6 +2,15 @@
   "applicationId": "incomm-monitor",
   "hook": {
     "name": "InnComm Write",
-    "entryPoint": "hooks/InnComm-Write.js"
+    "entryPoint": "hooks/InnComm-Write.js",
+    "commandExpiration": { "seconds": 300 },
+    "points": {
+      "query": {
+        "field": {
+          "property": "parent_name",
+          "text": "NF"
+        }
+      }
+    }
   }
 }

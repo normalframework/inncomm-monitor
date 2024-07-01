@@ -2,6 +2,7 @@
   "applicationId": "incomm-monitor",
   "hook": {
     "name": "InnComm Read",
-    "entryPoint": "hooks/InnComm-Read.js"
+    "entryPoint": "hooks/InnComm-Read.js",
+    "commandExpiration": { "seconds": 300 }
   }
 }
