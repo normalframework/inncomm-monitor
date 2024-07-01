@@ -2,6 +2,6 @@
   "applicationId": "incomm-monitor",
   "hook": {
     "name": "InnComm Read",
-    "entryPoint": "hooks/InComm-Read.js"
+    "entryPoint": "hooks/InnComm-Read.js"
   }
 }
