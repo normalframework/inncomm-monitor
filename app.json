@@ -1,0 +1,17 @@
+{
+  "name": "InnComm Monitor",
+  "description": "InnComm3 Monitor",
+  "options": [
+    {
+      "name": "INNCOM_IP",
+      "option_type": "TYPE_STRING",
+      "required": true
+    },
+    {
+      "name": "INNCOMM_PORT",
+      "optionType": "TYPE_REAL",
+      "required": true
+    },
+    { "name": "INNCOMM_SOCKET", "optionType": "TYPE_REAL", "required": true }
+  ]
+}

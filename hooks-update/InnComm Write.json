@@ -1,0 +1,7 @@
+{
+  "applicationId": "incomm-monitor",
+  "hook": {
+    "name": "InnComm Write",
+    "entryPoint": "hooks/InComm Write.js"
+  }
+}
