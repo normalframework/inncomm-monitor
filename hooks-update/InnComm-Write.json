@@ -4,6 +4,7 @@
     "name": "InnComm Write",
     "entryPoint": "hooks/InnComm-Write.js",
     "commandExpiration": "300s",
+    "mode": 2,
     "points": {
       "query": {
         "field": {
