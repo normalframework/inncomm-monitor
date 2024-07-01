@@ -3,7 +3,7 @@
   "hook": {
     "name": "InnComm Write",
     "entryPoint": "hooks/InnComm-Write.js",
-    "commandExpiration": { "seconds": 300 },
+    "commandExpiration": 300,
     "points": {
       "query": {
         "field": {
