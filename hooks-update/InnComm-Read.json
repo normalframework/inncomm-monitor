@@ -3,6 +3,6 @@
   "hook": {
     "name": "InnComm Read",
     "entryPoint": "hooks/InnComm-Read.js",
-    "commandExpiration": 300
+    "commandExpiration": "300s"
   }
 }
