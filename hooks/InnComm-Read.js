@@ -2,13 +2,15 @@ const NormalSdk = require("@normalframework/applications-sdk");
 const { InvokeSuccess, InvokeError } = NormalSdk;
 const { v5: uuidv5 } = require("uuid");
 var http;
+var devices = [];
+var bacnet_device = 0;
 
 /**
  * Invoke hook function
  * @param {NormalSdk.InvokeParams} params
  * @returns {NormalSdk.InvokeResult}
  */
-module.exports = async ({points, sdk, update, args}) => {
+module.exports = async ({points, sdk, config, update, args}) => {
     
     var s = require('net');
     http = sdk.http;
@@ -26,9 +28,11 @@ module.exports = async ({points, sdk, update, args}) => {
     var sync_complete = true;
 	var temp = null;
 
-	const INNCOM_IP = '10.16.0.113';
-	const INNCOM_PORT = 3002;
-	const INNCOM_SOCKET = 3301;
+	const INNCOM_IP = config.INNCOM_IP; //'10.16.0.113'
+	const INNCOM_PORT = config.INNCOMM_PORT; //3002
+	const INNCOM_SOCKET = config.INNCOMM_SOCKET; //3301
+	const INNCOM_DEVICE = config.INNCOMM_DEVICE; //30000
+	bacnet_device = INNCOM_DEVICE;
 
     try {
 		if (typeof global.inncom_client === 'undefined') {
@@ -161,13 +165,13 @@ async function process_report(d) {
 				console.log('report: ',m);
                 switch (p_code) {
 					case "000e":
-						local_object(p_room,0,'Check Out',5,p_unit,p_value);
+						local_object(p_room,0,'Check Out',8,5,p_unit,p_value);
 						break;
 					case "000f":
-						local_object(p_room,0,'Check In',5,p_unit,p_value);
+						local_object(p_room,0,'Check In',7,5,p_unit,p_value);
 						break;
 					case "0030":
-						local_object(p_room,0,'Ring Doorbell',5,p_unit,p_value);
+						local_object(p_room,0,'Ring Doorbell',34,5,p_unit,p_value);
 						break;
 					case "0039","1010":
 						// get target temp
@@ -179,17 +183,17 @@ async function process_report(d) {
 							p_unit = 62;
 						if (p_work.substr(1,1) == '1')
 							p_value = p_value * -1;
-						local_object(p_room,63,'Target Temperature',2,p_unit,p_value);
+						local_object(p_room,63,'Target Temperature',41,2,p_unit,p_value);
 						// get hvac mode
 						p_work = (parseInt(m.substr(38,4),16).toString(2)).padStart(16, '0');
 						// get fan speed
 						p_value = parseInt(p_work.substr(12,2),2);
 						p_unit = 95;
-						local_object(p_room,66,'Fan Speed',2,p_unit,p_value);
+						local_object(p_room,66,'Fan Speed',16,2,p_unit,p_value);
 						// get mode
 						p_value = parseInt(p_work.substr(14,2),2);
 						p_unit = 95;
-						local_object(p_room,65,'Mode',2,p_unit,p_value);
+						local_object(p_room,65,'Mode',25,2,p_unit,p_value);
 						break;
 					case "003a":
 						// get display temp
@@ -200,71 +204,71 @@ async function process_report(d) {
 							p_unit = 62;
 						if (p_work.substr(1,1) == '1')
 							p_value = p_value * -1;
-						local_object(p_room,0,'Display Temperature',2,p_unit,p_value);
+						local_object(p_room,0,'Display Temperature',10,2,p_unit,p_value);
 						break;
 					case "003b","0170":
 						// get fan speed
 						p_work = (parseInt(m.substr(34,4),16).toString(2)).padStart(16, '0');
 						p_value = parseInt(p_work.substr(14,2),2);
 						p_unit = 95;
-						local_object(p_room,66,'Fan Speed',2,p_unit,p_value);
+						local_object(p_room,66,'Fan Speed',16,2,p_unit,p_value);
 						break;
 					case "1000":
-						local_object(p_room,0,'Occupancy',5,p_unit,p_value);
+						local_object(p_room,0,'Occupancy',28,5,p_unit,p_value);
 						break;
 					case "1004":
-						local_object(p_room,0,'Rented',5,p_unit,p_value);
+						local_object(p_room,0,'Rented',33,5,p_unit,p_value);
 						break;
 					case "1006":
-						local_object(p_room,0,'Hibernation',5,p_unit,p_value);
+						local_object(p_room,0,'Hibernation',18,5,p_unit,p_value);
 						break;
 					case "1008":
-						local_object(p_room,32,'DND',5,p_unit,p_value);
+						local_object(p_room,32,'DND',11,5,p_unit,p_value);
 						break;
 					case "100a":
-						local_object(p_room,33,'MUR',5,p_unit,p_value);
+						local_object(p_room,33,'MUR',27,5,p_unit,p_value);
 						break;
 					case "100c":
-						local_object(p_room,0,'Minibar Door',5,p_unit,p_value);
+						local_object(p_room,0,'Minibar Door',23,5,p_unit,p_value);
 						break;
 					case "100e":
-						local_object(p_room,0,'Minibar Used',5,p_unit,p_value);
+						local_object(p_room,0,'Minibar Used',24,5,p_unit,p_value);
 						break;
 					case "101c":
-						local_object(p_room,0,'EMS',5,p_unit,p_value);
+						local_object(p_room,0,'EMS',15,5,p_unit,p_value);
 						break;
 					case "101d":
-						local_object(p_room,0,'Automation',5,p_unit,p_value);
+						local_object(p_room,0,'Automation',3,5,p_unit,p_value);
 						break;
 					case "101e":
-						local_object(p_room,0,'ADA',5,p_unit,p_value);
+						local_object(p_room,0,'ADA',1,5,p_unit,p_value);
 						break;
 					case "1020":
-						local_object(p_room,0,'Humidity',2,p_unit,p_value);
+						local_object(p_room,0,'Humidity',19,2,p_unit,p_value);
 						break;
 					case "1034":
-						local_object(p_room,0,'Peak Demand',2,p_unit,p_value);
+						local_object(p_room,0,'Peak Demand',31,2,p_unit,p_value);
 						break;
 					case "1037":
-						local_object(p_room,0,'Wet',5,p_unit,p_value);
+						local_object(p_room,0,'Wet',44,5,p_unit,p_value);
 						break;
 					case "1090":
-						local_object(p_room,0,'Light Level',2,p_unit,p_value);
+						local_object(p_room,0,'Light Level',22,2,p_unit,p_value);
 						break;
 					case "10d0":
-						local_object(p_room,0,'Room Dirty',5,p_unit,p_value);
+						local_object(p_room,0,'Room Dirty',35,5,p_unit,p_value);
 						break;
 					case "10d1":
-						local_object(p_room,0,'Supervisor',5,p_unit,p_value);
+						local_object(p_room,0,'Supervisor',40,5,p_unit,p_value);
 						break;
 					case "10d2":
-						local_object(p_room,0,'Out of Order',5,p_unit,p_value);
+						local_object(p_room,0,'Out of Order',29,5,p_unit,p_value);
 						break;
 					case "10d3":
-						local_object(p_room,0,'VIP',5,p_unit,p_value);
+						local_object(p_room,0,'VIP',43,5,p_unit,p_value);
 						break;
 					case "10d4":
-						local_object(p_room,176,'ECO Mode',5,p_unit,p_value);
+						local_object(p_room,176,'ECO Mode',14,5,p_unit,p_value);
 						break;
 					case "10d8":
 						// get outside temp
@@ -276,43 +280,43 @@ async function process_report(d) {
 							p_unit = 62;
 						if (p_work.substr(1,1) == '1')
 							p_value = p_value * -1;
-						local_object(p_room,0,'Outside Temperature',2,p_unit,p_value);
+						local_object(p_room,0,'Outside Temperature',30,2,p_unit,p_value);
 						break;
 					case "10e2":
-						local_object(p_room,154,'Valet',5,p_unit,p_value);
+						local_object(p_room,154,'Valet',42,5,p_unit,p_value);
 						break;
 					case "10e3":
-						local_object(p_room,155,'Foodtray',5,p_unit,p_value);
+						local_object(p_room,155,'Foodtray',17,5,p_unit,p_value);
 						break;
 					case "10e4":
-						local_object(p_room,156,'Butler',5,p_unit,p_value);
+						local_object(p_room,156,'Butler',6,5,p_unit,p_value);
 						break;
 					case "10e5":
-						local_object(p_room,0,'Shoeshine',5,p_unit,p_value);
+						local_object(p_room,0,'Shoeshine',37,5,p_unit,p_value);
 						break;
 					case "10e6":
-						local_object(p_room,0,'Msg Waiting',5,p_unit,p_value);
+						local_object(p_room,0,'Msg Waiting',26,5,p_unit,p_value);
 						break;
 					case "10e7":
-						local_object(p_room,0,'SOS',5,p_unit,p_value);
+						local_object(p_room,0,'SOS',39,5,p_unit,p_value);
 						break;
 					case "10e8":
-						local_object(p_room,0,'Safe Locked',5,p_unit,p_value);
+						local_object(p_room,0,'Safe Locked',36,5,p_unit,p_value);
 						break;
 					case "10ea":
-						local_object(p_room,0,'Smoke Alarm',5,p_unit,p_value);
+						local_object(p_room,0,'Smoke Alarm',38,5,p_unit,p_value);
 						break;
 					case "10eb":
-						local_object(p_room,0,'Key Tag',5,p_unit,p_value);
+						local_object(p_room,0,'Key Tag',21,5,p_unit,p_value);
 						break;
 					case "10ec":
-						local_object(p_room,0,'Window Open',5,p_unit,p_value);
+						local_object(p_room,0,'Window Open',45,5,p_unit,p_value);
 						break;
 					case "10ed":
-						local_object(p_room,0,'Phone In Use',5,p_unit,p_value);
+						local_object(p_room,0,'Phone In Use',32,5,p_unit,p_value);
 						break;
 					case "10ee":
-						local_object(p_room,0,'Entry Door Open',5,p_unit,p_value);
+						local_object(p_room,0,'Entry Door Open',13,5,p_unit,p_value);
 						break;
 				}
             }
@@ -367,40 +371,40 @@ async function process_update(d) {
 				console.log('update: ',m);
                 switch (p_code) {
 					case "e000":
-						local_object(p_room,0,'Rented',5,p_unit,p_value);
+						local_object(p_room,0,'Rented',33,5,p_unit,p_value);
 						break;
 					case "e001":
-						local_object(p_room,0,'Occupancy',5,p_unit,p_value);
+						local_object(p_room,0,'Occupancy',28,5,p_unit,p_value);
 						break;
 					case "e002":
-						local_object(p_room,32,'DND',5,p_unit,p_value);
+						local_object(p_room,32,'DND',11,5,p_unit,p_value);
 						break;
 					case "e003":
-						local_object(p_room,33,'MUR',5,p_unit,p_value);
+						local_object(p_room,33,'MUR',27,5,p_unit,p_value);
 						break;
 					case "e004":
-						local_object(p_room,156,'Butler',5,p_unit,p_value);
+						local_object(p_room,156,'Butler',6,5,p_unit,p_value);
 						break;
 					case "e005":
-						local_object(p_room,155,'Foodtray',5,p_unit,p_value);
+						local_object(p_room,155,'Foodtray',17,5,p_unit,p_value);
 						break;
 					case "e006":
-						local_object(p_room,0,'Safe Locked',5,p_unit,p_value);
+						local_object(p_room,0,'Safe Locked',36,5,p_unit,p_value);
 						break;
 					case "e007":
-						local_object(p_room,154,'Valet',5,p_unit,p_value);
+						local_object(p_room,154,'Valet',42,5,p_unit,p_value);
 						break;
 					case "e008":
-						local_object(p_room,0,'Comfort Status',5,p_unit,p_value);
+						local_object(p_room,0,'Comfort Status',9,5,p_unit,p_value);
 						break;
 					case "e009":
-						local_object(p_room,0,'HVAC Status',5,p_unit,p_value);
+						local_object(p_room,0,'HVAC Status',20,5,p_unit,p_value);
 						break;
 					case "e00a":
-						local_object(p_room,0,'Door Ajar',5,p_unit,p_value);
+						local_object(p_room,0,'Door Ajar',12,5,p_unit,p_value);
 						break;
 					case "e00b":
-						local_object(p_room,0,'Door Open',5,p_unit,p_value);
+						local_object(p_room,0,'Door Open',13,5,p_unit,p_value);
 						break;
 					case "e010":
 						// target temp, fs, mode
@@ -411,36 +415,36 @@ async function process_update(d) {
 						p_unit = 64;
 						if (p_work.substr(1,1) == '1')
 							p_unit = 62;
-						local_object(p_room,63,'Target Temperature',2,p_unit,p_value);
+						local_object(p_room,63,'Target Temperature',41,2,p_unit,p_value);
 						// get fan speed
 						p_value = parseInt(p_work.substr(12,2),2);
 						p_unit = 95;
-						local_object(p_room,66,'Fan Speed',2,p_unit,p_value);
+						local_object(p_room,66,'Fan Speed',16,2,p_unit,p_value);
 						// get mode
 						p_value = parseInt(p_work.substr(14,2),2);
 						p_unit = 95;
-						local_object(p_room,65,'Mode',2,p_unit,p_value);
+						local_object(p_room,65,'Mode',25,2,p_unit,p_value);
 						break;
 					case "e011":
-						local_object(p_room,0,'Aux1',5,p_unit,p_value);
+						local_object(p_room,0,'Aux1',4,5,p_unit,p_value);
 						break;
 					case "e012":
-						local_object(p_room,0,'Aux2',5,p_unit,p_value);
+						local_object(p_room,0,'Aux2',5,5,p_unit,p_value);
 						break;
 					case "e013":
-						local_object(p_room,0,'Room Dirty',5,p_unit,p_value);
+						local_object(p_room,0,'Room Dirty',35,5,p_unit,p_value);
 						break;
 					case "e014":
-						local_object(p_room,0,'Supervisor',5,p_unit,p_value);
+						local_object(p_room,0,'Supervisor',40,5,p_unit,p_value);
 						break;
 					case "e015":
-						local_object(p_room,0,'Out of Order',5,p_unit,p_value);
+						local_object(p_room,0,'Out of Order',29,5,p_unit,p_value);
 						break;
 					case "e016":
-						local_object(p_room,0,'Smoke Detector',5,p_unit,p_value);
+						local_object(p_room,0,'Smoke Detector',38,5,p_unit,p_value);
 						break;
 					case "e017":
-						local_object(p_room,0,'Air Filter',5,p_unit,p_value);
+						local_object(p_room,0,'Air Filter',2,5,p_unit,p_value);
 						break;
 				}
 			}
@@ -456,18 +460,39 @@ async function process_update(d) {
     }
 }
 
-async function local_object(room,code,name,type,unit,pvalue) {
+async function local_object(room,code,name,instance,type,unit,pvalue) {
     // enum https://reference.opcfoundation.org/BACnet/v200/docs/11
 	// vtype https://biancoroyal.github.io/node-bacstack/global.html#ApplicationTag
     const NEURO_NAMESPACE = '21e829e8-b08d-412f-b196-39f0ec3e691a';
     const NEURO_EQUIP_TYPE = 'd0e313a3-fce4-4665-96cc-3d34ad53ede0';
 	var dname = name.replaceAll(' ','').toLowerCase();
+	// see if room device has been provisioned
+	var device_added = devices.includes(room);
 	var props = [];
 	
 	// debug test
 	console.log('object: ',room,name,type,unit,pvalue);
 	//return;
+			
+	// add device if needed
+	if (device_added === false) {
+		// add room to device list
+		devices.push(room);
+		props.push(
+			{property: "localDeviceInstanceOffset", value: (bacnet_device + room)},
+			{property: "objectId, value: {objectType: 8}},
+			{property: "PROP_OBJECT_NAME", value: {characterString: "Room " + room}},
+			{property: "PROP_DESCRIPTION", value: {characterString: "Room " + room + " Thermostat"}});
+		await http.post("/api/v1/bacnet/local", {
+			uuid: uuidv5("Room." + room, NEURO_NAMESPACE),
+			props: props
+		}).catch((e) => {
+			console.log('Create Device Err: ',e);
+		});
+	}
 	
+	props = [];
+
 	// push value type
 	if (type == 2) 
 		props.push({property: "PROP_PRESENT_VALUE", value: {real: pvalue}});
@@ -489,7 +514,8 @@ async function local_object(room,code,name,type,unit,pvalue) {
 				{property: "PROP_DESCRIPTION", value: {characterString: name + " Sensor"}});
 			http.post("/api/v1/bacnet/local", {
 				uuid: uuidv5(room + "." + dname, NEURO_NAMESPACE),
-				objectId: {instance: 0, objectType: type},
+				localDeviceInstanceOffset: (bacnet_device + room),
+				objectId: {instance: instance, objectType: type},
 				props: props
 			}).catch((e) => {
 				return;
@@ -497,3 +523,50 @@ async function local_object(room,code,name,type,unit,pvalue) {
 		}
 	});
 }
+/*
+ADA	1
+Air Filter	2
+Automation	3
+Aux1	4
+Aux2	5
+Butler	6
+Check In	7
+Check Out	8
+Comfort Status	9
+Display Temperature	10
+DND	11
+Door Ajar	12
+Door Open	13
+ECO Mode	14
+EMS	15
+Fan Speed	16
+Foodtray	17
+Hibernation	18
+Humidity	19
+HVAC Status	20
+Key Tag	21
+Light Level	22
+Minibar Door	23
+Minibar Used	24
+Mode	25
+Msg Waiting	26
+MUR	27
+Occupancy	28
+Out of Order	29
+Outside Temperature	30
+Peak Demand	31
+Phone in Use	32
+Rented	33
+Ring Doorbell	34
+Room Dirty	35
+Safe Locked	36
+Shoshine	37
+Smoke Detector	38
+SOS	39
+Supervisor	40
+Target Temperature	41
+Valet	42
+VIP	43
+Wet	44
+Window Open	45
+*/
